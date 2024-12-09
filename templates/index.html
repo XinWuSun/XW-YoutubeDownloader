@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube视频下载器</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="text-center mb-5">
+            <h1>YouTube视频下载器</h1>
+            <p>免费、快速、无广告。粘贴YouTube链接即可下载。</p>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <form method="POST" action="/download" id="downloadForm">
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" name="url" 
+                               placeholder="https://www.youtube.com/watch?v=..." required>
+                        <select class="form-select" name="audio_format" style="max-width: 120px;">
+                            <option value="m4a">M4A</option>
+                            <option value="mp3">MP3</option>
+                        </select>
+                        <button class="btn btn-primary" type="submit" id="downloadBtn">下载</button>
+                    </div>
+                </form>
+                
+                <!-- 进度条 -->
+                <div id="progressContainer" class="mt-3 d-none">
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                             role="progressbar" style="width: 0%" 
+                             id="downloadProgress">0%</div>
+                    </div>
+                    <small class="text-muted" id="downloadStatus">准备下载...</small>
+                </div>
+
+                {% if error %}
+                <div class="alert alert-danger mt-3">
+                    {{ error }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if video_info %}
+        <div class="mt-4">
+            <h3>下载信息</h3>
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            {% if video_info.thumbnail %}
+                            <img src="{{ video_info.thumbnail }}" class="img-fluid rounded" alt="视频缩略图">
+                            {% endif %}
+                        </div>
+                        <div class="col-md-8">
+                            <h5>{{ video_info.title }}</h5>
+                            <p>时长: {{ video_info.duration }} 秒</p>
+                            {% if video_info.filesize %}
+                            <p>文件大小: {{ video_info.filesize }}</p>
+                            {% endif %}
+                            <div class="mt-3">
+                                <a href="{{ video_info.video_path }}" class="btn btn-success mb-2" download>
+                                    <i class="bi bi-download"></i> 下载视频
+                                </a>
+                                <a href="{{ video_info.audio_path }}" class="btn btn-info mb-2" download>
+                                    <i class="bi bi-music-note"></i> 下载音频
+                                </a>
+                                {% if video_info.video_path %}
+                                <div class="mt-3">
+                                    <video controls class="w-100">
+                                        <source src="{{ video_info.video_path }}" type="video/mp4">
+                                        您的浏览器不支持视频预览
+                                    </video>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        document.getElementById('downloadForm').addEventListener('submit', function(e) {
+            const progressContainer = document.getElementById('progressContainer');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const downloadStatus = document.getElementById('downloadStatus');
+            const progressBar = document.getElementById('downloadProgress');
+            
+            progressContainer.classList.remove('d-none');
+            downloadBtn.disabled = true;
+            downloadStatus.textContent = '正在下载...';
+            
+            // 这里可以添加轮询下载进度的代码
+            let progress = 0;
+            const interval = setInterval(() => {
+                if (progress < 90) {
+                    progress += 5;
+                    progressBar.style.width = progress + '%';
+                    progressBar.textContent = progress + '%';
+                }
+            }, 500);
+            
+            // 表单提交后自动处理重定向
+        });
+    </script>
+</body>
+</html> 
